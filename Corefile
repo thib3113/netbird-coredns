@@ -1,0 +1,8 @@
+.:5353 {
+    # Forward DNS requests to Cloudflare's public DNS servers.
+    forward . 1.1.1.1 1.0.0.1
+    # Enable logging for requests.
+    log
+    # Enable logging for errors.
+    errors
+}

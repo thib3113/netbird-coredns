@@ -1,0 +1,63 @@
+name: 'Build and deploy release'
+inputs:
+  VERSION:
+    description: 'The new version'
+    required: true
+  DOCKERHUB_USERNAME:
+    description: 'docker username'
+    sensitive: true
+    required: true
+  DOCKERHUB_TOKEN:
+    description: 'docker token'
+    required: true
+  GITHUB_TOKEN:
+    description: 'github token'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup QEMU
+      uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # v3.6.0
+
+    - name: Setup Docker buildx
+      uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f # v5.8.0
+      with:
+        images: |
+          docker.io/thib3113/netbird-coredns
+          ghcr.io/${{ github.repository_owner }}/netbird-coredns
+        tags: |
+          type=raw,value=latest,enable={{is_default_branch}}
+          type=semver,pattern={{version}},value=${{ inputs.VERSION }}
+          type=semver,pattern={{major}}.{{minor}},value=${{ inputs.VERSION }}
+          type=semver,pattern={{major}},value=${{ inputs.VERSION }}
+
+    - name: Login to Github Container Registry
+      uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ inputs.GITHUB_TOKEN }}
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+      with:
+        username: ${{ inputs.DOCKERHUB_USERNAME }}
+        password: ${{ inputs.DOCKERHUB_TOKEN }}
+
+    - name: Build and push image
+      id: build-and-push
+      uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+      with:
+        context: .
+        platforms: linux/amd64,linux/arm64
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        push: true
+        build-args: |
+          COREDNS_VERSION_NUM=${{ inputs.VERSION }}
+          COREDNS_VERSION_TAG=v${{ inputs.VERSION }}

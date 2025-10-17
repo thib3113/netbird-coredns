@@ -1,0 +1,105 @@
+name: Build Netbird+CoreDNS
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - '.github/**/*.yml'
+      - 'Dockerfile'
+
+env:
+  # Repository to check for new releases
+  REMOTE_REPO: "coredns/coredns"
+  DOCKER_IMAGE_NAME: "thib3113/netbird-coredns"
+  BASE_BRANCH: "main"
+
+jobs:
+  check-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        # Using v4 for up-to-date action
+        uses: actions/checkout@v4
+
+      - name: Check for new release
+        id: release-infos
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require("fs");
+            const REMOTE_REPO = process.env.REMOTE_REPO;
+            const SYNC_DATE_STORAGE = ".last_check";
+            
+            let lastReleaseSync;
+            try {
+                lastReleaseSync = fs.readFileSync(SYNC_DATE_STORAGE, "utf8").trim();
+            } catch (err) {
+                lastReleaseSync = "1970-01-01T00:00:00Z";
+            }
+            
+            const latestRelease = await github.rest.repos.getLatestRelease({
+                owner: REMOTE_REPO.split("/")[0],
+                repo: REMOTE_REPO.split("/")[1],
+            });
+            
+            const latestReleaseDate = latestRelease.data.published_at;
+            const latestReleaseVersionTag = latestRelease.data.tag_name; // e.g., "v1.11.1"
+            
+            // Create a version number without the 'v' (e.g., "1.11.1")
+            const latestReleaseVersionNum = latestReleaseVersionTag.startsWith('v')
+                ? latestReleaseVersionTag.substring(1)
+                : latestReleaseVersionTag;
+            
+            console.log(`CoreDNS Latest release tag: ${latestReleaseVersionTag}`);
+            console.log(`CoreDNS Latest release num: ${latestReleaseVersionNum}`);
+            console.log(`CoreDNS Last release builded: ${lastReleaseSync}`);
+            
+            await exec.exec("git", ["config", "--global", "user.name", "github-actions[bot]"]);
+            await exec.exec("git", ["config", "--global", "user.email", "github-actions[bot]@users.noreply.github.com"]);
+             
+            // Update readme
+            const now = new Date().toISOString();
+            
+            let readmeContent = fs.readFileSync("README.md", "utf8");
+            const runCommentStart = "<!-- START last_run_sync -->";
+            const runCommentEnd = "<!-- END last_run_sync -->";
+            const versionCommentStart = "<!-- START latest_release_version -->";
+            const versionCommentEnd = "<!-- END latest_release_version -->";
+  
+            const newRunSyncSection = `${runCommentStart}\`${now}\`${runCommentEnd}`;
+            const newVersionSection = `${versionCommentStart}\`${latestReleaseVersion}\`${versionCommentEnd}`;
+            readmeContent = readmeContent.replace(new RegExp(`${runCommentStart}[\\s\\S]*?${runCommentEnd}`), newRunSyncSection);
+            readmeContent = readmeContent.replace(
+              new RegExp(`${versionCommentStart}[\\s\\S]*?${versionCommentEnd}`),
+              newVersionSection
+            );
+            fs.writeFileSync("README.md", readmeContent);
+            
+            fs.writeFileSync(SYNC_DATE_STORAGE, now);
+            
+            await exec.exec("git", ["add", SYNC_DATE_STORAGE, 'README.md']);
+            await exec.exec("git", ["commit", "-m", `sync(coredns): update last check to ${now}`]);
+            await exec.exec("git", ["push"]);
+          
+            if (new Date(latestReleaseDate) > new Date(lastReleaseSync)) {
+                console.log("New CoreDNS release detected!");
+                core.setOutput('version_num', latestReleaseVersionNum);
+              } else {
+                console.log("No new CoreDNS release.");
+              }
+
+      - name: Build and Push on New Release
+        # This step only runs if the 'release-infos' step found a new version and set the 'version' output.
+        if: steps.release-infos.outputs.version != ''
+        uses: ./.github/actions/build
+        with:
+          VERSION: ${{ steps.release-infos.outputs.version }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
