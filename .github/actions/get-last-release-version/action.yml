@@ -25,10 +25,17 @@ runs:
         script: |
           const REMOTE_REPO = process.env.REMOTE_REPO;
 
-          const latestRelease = await github.rest.repos.getLatestRelease({
-              owner: REMOTE_REPO.split("/")[0],
-              repo: REMOTE_REPO.split("/")[1],
-          });
+            const latestRelease = await github.rest.repos.getLatestRelease({
+                owner: REMOTE_REPO.split("/")[0],
+                repo: REMOTE_REPO.split("/")[1],
+            });
+          
+            const latestReleaseDate = latestRelease.data.published_at;
+            const latestReleaseVersionTag = latestRelease.data.tag_name; // e.g., "v1.11.1"
+          
+            // Create a version number without the 'v' (e.g., "1.11.1")
+            const latestReleaseVersion = latestReleaseVersionTag.startsWith('v')
+                ? latestReleaseVersionTag.substring(1)
+                : latestReleaseVersionTag;
 
-          const latestReleaseVersion = latestRelease.data.tag_name;
           core.setOutput('version', latestReleaseVersion);
