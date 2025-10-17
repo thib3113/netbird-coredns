@@ -17,6 +17,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-          repository: thib3113/parsedmarc
+          repository: thib3113/netbird-coredns
           short-description: ${{ github.event.repository.description }}
           readme-filepath: README.md
