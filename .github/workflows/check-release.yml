@@ -58,7 +58,7 @@ jobs:
             
             console.log(`CoreDNS Latest release tag: ${latestReleaseVersionTag}`);
             console.log(`CoreDNS Latest release num: ${latestReleaseVersion}`);
-            console.log(`CoreDNS Last release builded: ${lastReleaseSync}`);
+            console.log(`CoreDNS Last release built: ${lastReleaseSync}`);
             
             await exec.exec("git", ["config", "--global", "user.name", "github-actions[bot]"]);
             await exec.exec("git", ["config", "--global", "user.email", "github-actions[bot]@users.noreply.github.com"]);
