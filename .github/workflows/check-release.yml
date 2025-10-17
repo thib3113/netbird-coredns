@@ -52,12 +52,12 @@ jobs:
             const latestReleaseVersionTag = latestRelease.data.tag_name; // e.g., "v1.11.1"
             
             // Create a version number without the 'v' (e.g., "1.11.1")
-            const latestReleaseVersionNum = latestReleaseVersionTag.startsWith('v')
+            const latestReleaseVersion = latestReleaseVersionTag.startsWith('v')
                 ? latestReleaseVersionTag.substring(1)
                 : latestReleaseVersionTag;
             
             console.log(`CoreDNS Latest release tag: ${latestReleaseVersionTag}`);
-            console.log(`CoreDNS Latest release num: ${latestReleaseVersionNum}`);
+            console.log(`CoreDNS Latest release num: ${latestReleaseVersion}`);
             console.log(`CoreDNS Last release builded: ${lastReleaseSync}`);
             
             await exec.exec("git", ["config", "--global", "user.name", "github-actions[bot]"]);
@@ -89,7 +89,7 @@ jobs:
           
             if (new Date(latestReleaseDate) > new Date(lastReleaseSync)) {
                 console.log("New CoreDNS release detected!");
-                core.setOutput('version_num', latestReleaseVersionNum);
+                core.setOutput('version', latestReleaseVersion);
               } else {
                 console.log("No new CoreDNS release.");
               }
