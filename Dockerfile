@@ -36,4 +36,5 @@ RUN chmod +x /entrypoint.sh
 
 VOLUME /etc/coredns
 
+
 ENTRYPOINT ["/entrypoint.sh"]
