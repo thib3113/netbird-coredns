@@ -30,23 +30,28 @@ mkdir ./coredns_config
 cat <<EOF > ./coredns_config/Corefile
 # This is a sample Corefile.
 company.lan:5353 {
-    # Rewrite all requests to "traefik" => So, test.company.lan will be redirected to your traefik (it allow, to use netbird, to acces in your docker) 
-    rewrite name regex (.*)\.company\.lan traefik
+    errors
 
-    # forward to internal docker DNS
+    log
+
+    cache 30
+
+    template IN A AAAA company.lan {
+        match ^(.*)\.company\.lan\.?$
+
+        answer "{{.Name }} 60 IN CNAME traefik.company.lan."
+
+        fallthrough
+    }
+}
+
+traefik.company.lan:5353 {
+    errors
+    log
+    cache 30
     forward . 127.0.0.11
-
-    log
-    errors
 }
 
-
-# It listens on port 5353 and forwards all requests to Cloudflare's DNS.
-.:5353 {
-    forward . 1.1.1.1 1.0.0.1
-    log
-    errors
-}
 EOF
 ```
 
