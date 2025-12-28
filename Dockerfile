@@ -1,4 +1,4 @@
-FROM netbirdio/netbird:latest@sha256:9295cfd892098afc1f7cfc74e61b03b86933015e705f554f96c06a55c362e8fa
+FROM netbirdio/netbird:latest@sha256:d6e54385d445ed216d0cb11a11f855de81961fb6b264542c290f2fe8297a5f2f
 # Build arguments:
 #   - TARGETARCH: The target architecture (e.g., amd64, arm64). This is automatically provided by docker/build-push-action.
 #   - COREDNS_VERSION_TAG: The git tag for the CoreDNS release (e.g., v1.11.1).
