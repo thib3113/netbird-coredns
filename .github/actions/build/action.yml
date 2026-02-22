@@ -37,14 +37,14 @@ runs:
           type=semver,pattern={{major}},value=${{ inputs.VERSION }}
 
     - name: Login to Github Container Registry
-      uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+      uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ inputs.GITHUB_TOKEN }}
 
     - name: Login to Docker Hub
-      uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+      uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
       with:
         username: ${{ inputs.DOCKERHUB_USERNAME }}
         password: ${{ inputs.DOCKERHUB_TOKEN }}
