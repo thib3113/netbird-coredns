@@ -1,6 +1,6 @@
-Last check : <!-- START last_run_sync -->`2026-08-19T00:03:20.265Z`<!-- END last_run_sync -->
+Last check : <!-- START last_run_sync -->`2026-08-20T00:03:34.372Z`<!-- END last_run_sync -->
 
-CoreDNS version : <!-- START latest_release_version -->`1.14.6`<!-- END latest_release_version -->
+CoreDNS version : <!-- START latest_release_version -->`1.14.7`<!-- END latest_release_version -->
 
 ## Netbird + CoreDNS
 This Docker image combines a [Netbird](https://netbird.io/) client with a [CoreDNS](https://coredns.io/) server. 
