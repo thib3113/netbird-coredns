@@ -1,4 +1,4 @@
-Last check : <!-- START last_run_sync -->`2026-11-16T00:03:04.313Z`<!-- END last_run_sync -->
+Last check : <!-- START last_run_sync -->`2026-11-17T00:03:00.563Z`<!-- END last_run_sync -->
 
 CoreDNS version : <!-- START latest_release_version -->`1.15.0`<!-- END latest_release_version -->
 
